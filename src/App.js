@@ -822,8 +822,34 @@ export default function ActivityTracker() {
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
                 onMouseLeave={stopDrawing}
-                className="border-2 border-gray-300 rounded-xl cursor-crosshair w-full max-w-full bg-white"
-                style={{ touchAction: 'none' }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  const touch = e.touches[0];
+                  const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                  });
+                  startDrawing(mouseEvent);
+                }}
+                onTouchMove={(e) => {
+                  e.preventDefault();
+                  const touch = e.touches[0];
+                  const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                  });
+                  draw(mouseEvent);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  stopDrawing();
+                }}
+                className="border-2 border-gray-300 rounded-xl cursor-crosshair w-full max-w-full bg-white block"
+                style={{ 
+                  touchAction: 'none',
+                  maxWidth: '100%',
+                  height: 'auto'
+                }}
               />
             </div>
 

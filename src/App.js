@@ -2,8 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Check, X, Play, Pause, List, Timer, Calendar, Coffee, Target, BookOpen, Lightbulb, Palette, Save, Trash2 } from 'lucide-react';
 
 export default function ActivityTracker() {
-  const [activities, setActivities] = useState([]);
-  const [todos, setTodos] = useState([]);
+  // Load data from localStorage or use empty arrays
+  const [activities, setActivities] = useState(() => {
+    const saved = localStorage.getItem('productivity-activities');
+    return saved ? JSON.parse(saved).map(activity => ({
+      ...activity,
+      createdAt: new Date(activity.createdAt),
+      completedAt: activity.completedAt ? new Date(activity.completedAt) : null
+    })) : [];
+  });
+  
+  const [todos, setTodos] = useState(() => {
+    const saved = localStorage.getItem('productivity-todos');
+    return saved ? JSON.parse(saved).map(todo => ({
+      ...todo,
+      createdAt: new Date(todo.createdAt),
+      completedAt: todo.completedAt ? new Date(todo.completedAt) : null
+    })) : [];
+  });
+  
   const [newActivity, setNewActivity] = useState('');
   const [newTodo, setNewTodo] = useState('');
   const [activeTimers, setActiveTimers] = useState({});
@@ -12,12 +29,27 @@ export default function ActivityTracker() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   // Journal state
-  const [journalEntries, setJournalEntries] = useState([]);
+  const [journalEntries, setJournalEntries] = useState(() => {
+    const saved = localStorage.getItem('productivity-journal');
+    return saved ? JSON.parse(saved).map(entry => ({
+      ...entry,
+      date: new Date(entry.date),
+      createdAt: new Date(entry.createdAt)
+    })) : [];
+  });
+  
   const [currentJournalEntry, setCurrentJournalEntry] = useState('');
   const [journalTitle, setJournalTitle] = useState('');
   
   // Thoughts state
-  const [thoughts, setThoughts] = useState([]);
+  const [thoughts, setThoughts] = useState(() => {
+    const saved = localStorage.getItem('productivity-thoughts');
+    return saved ? JSON.parse(saved).map(thought => ({
+      ...thought,
+      createdAt: new Date(thought.createdAt)
+    })) : [];
+  });
+  
   const [currentThought, setCurrentThought] = useState('');
   
   // Sketch state
@@ -25,7 +57,13 @@ export default function ActivityTracker() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushSize, setBrushSize] = useState(3);
   const [brushColor, setBrushColor] = useState('#000000');
-  const [sketches, setSketches] = useState([]);
+  const [sketches, setSketches] = useState(() => {
+    const saved = localStorage.getItem('productivity-sketches');
+    return saved ? JSON.parse(saved).map(sketch => ({
+      ...sketch,
+      createdAt: new Date(sketch.createdAt)
+    })) : [];
+  });
   
   // Pomodoro state
   const [pomodoroState, setPomodoroState] = useState({
@@ -41,6 +79,31 @@ export default function ActivityTracker() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Save activities to localStorage
+  useEffect(() => {
+    localStorage.setItem('productivity-activities', JSON.stringify(activities));
+  }, [activities]);
+
+  // Save todos to localStorage
+  useEffect(() => {
+    localStorage.setItem('productivity-todos', JSON.stringify(todos));
+  }, [todos]);
+
+  // Save journal entries to localStorage
+  useEffect(() => {
+    localStorage.setItem('productivity-journal', JSON.stringify(journalEntries));
+  }, [journalEntries]);
+
+  // Save thoughts to localStorage
+  useEffect(() => {
+    localStorage.setItem('productivity-thoughts', JSON.stringify(thoughts));
+  }, [thoughts]);
+
+  // Save sketches to localStorage
+  useEffect(() => {
+    localStorage.setItem('productivity-sketches', JSON.stringify(sketches));
+  }, [sketches]);
 
   // Update active timers every second
   useEffect(() => {

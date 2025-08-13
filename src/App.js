@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Plus, Check, X, Play, Pause, List, Timer, Calendar, Coffee, Target, BookOpen, Lightbulb, Palette, Save, Download, Trash2, Edit3 } from 'lucide-react';
+import { Plus, Check, X, Play, Pause, List, Timer, Calendar, Coffee, Target, BookOpen, Lightbulb, Palette, Save, Trash2 } from 'lucide-react';
 
 export default function ActivityTracker() {
   const [activities, setActivities] = useState([]);

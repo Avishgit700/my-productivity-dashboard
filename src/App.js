@@ -2,24 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Check, X, Play, Pause, List, Timer, Calendar, Coffee, Target, BookOpen, Lightbulb, Palette, Save, Trash2 } from 'lucide-react';
 
 export default function ActivityTracker() {
-  // Load data from localStorage or use empty arrays
-  const [activities, setActivities] = useState(() => {
-    const saved = localStorage.getItem('productivity-activities');
-    return saved ? JSON.parse(saved).map(activity => ({
-      ...activity,
-      createdAt: new Date(activity.createdAt),
-      completedAt: activity.completedAt ? new Date(activity.completedAt) : null
-    })) : [];
-  });
-  
-  const [todos, setTodos] = useState(() => {
-    const saved = localStorage.getItem('productivity-todos');
-    return saved ? JSON.parse(saved).map(todo => ({
-      ...todo,
-      createdAt: new Date(todo.createdAt),
-      completedAt: todo.completedAt ? new Date(todo.completedAt) : null
-    })) : [];
-  });
+  // Initialize with empty arrays - no localStorage
+  const [activities, setActivities] = useState([]);
+  const [todos, setTodos] = useState([]);
   
   const [newActivity, setNewActivity] = useState('');
   const [newTodo, setNewTodo] = useState('');
@@ -29,27 +14,12 @@ export default function ActivityTracker() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   // Journal state
-  const [journalEntries, setJournalEntries] = useState(() => {
-    const saved = localStorage.getItem('productivity-journal');
-    return saved ? JSON.parse(saved).map(entry => ({
-      ...entry,
-      date: new Date(entry.date),
-      createdAt: new Date(entry.createdAt)
-    })) : [];
-  });
-  
+  const [journalEntries, setJournalEntries] = useState([]);
   const [currentJournalEntry, setCurrentJournalEntry] = useState('');
   const [journalTitle, setJournalTitle] = useState('');
   
   // Thoughts state
-  const [thoughts, setThoughts] = useState(() => {
-    const saved = localStorage.getItem('productivity-thoughts');
-    return saved ? JSON.parse(saved).map(thought => ({
-      ...thought,
-      createdAt: new Date(thought.createdAt)
-    })) : [];
-  });
-  
+  const [thoughts, setThoughts] = useState([]);
   const [currentThought, setCurrentThought] = useState('');
   
   // Sketch state
@@ -57,13 +27,7 @@ export default function ActivityTracker() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [brushSize, setBrushSize] = useState(3);
   const [brushColor, setBrushColor] = useState('#000000');
-  const [sketches, setSketches] = useState(() => {
-    const saved = localStorage.getItem('productivity-sketches');
-    return saved ? JSON.parse(saved).map(sketch => ({
-      ...sketch,
-      createdAt: new Date(sketch.createdAt)
-    })) : [];
-  });
+  const [sketches, setSketches] = useState([]);
   
   // Pomodoro state
   const [pomodoroState, setPomodoroState] = useState({
@@ -79,31 +43,6 @@ export default function ActivityTracker() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Save activities to localStorage
-  useEffect(() => {
-    localStorage.setItem('productivity-activities', JSON.stringify(activities));
-  }, [activities]);
-
-  // Save todos to localStorage
-  useEffect(() => {
-    localStorage.setItem('productivity-todos', JSON.stringify(todos));
-  }, [todos]);
-
-  // Save journal entries to localStorage
-  useEffect(() => {
-    localStorage.setItem('productivity-journal', JSON.stringify(journalEntries));
-  }, [journalEntries]);
-
-  // Save thoughts to localStorage
-  useEffect(() => {
-    localStorage.setItem('productivity-thoughts', JSON.stringify(thoughts));
-  }, [thoughts]);
-
-  // Save sketches to localStorage
-  useEffect(() => {
-    localStorage.setItem('productivity-sketches', JSON.stringify(sketches));
-  }, [sketches]);
 
   // Update active timers every second
   useEffect(() => {
@@ -168,7 +107,7 @@ export default function ActivityTracker() {
         completedAt: null,
         totalTime: 0
       };
-      setActivities([activity, ...activities]);
+      setActivities(prevActivities => [activity, ...prevActivities]);
       setNewActivity('');
     }
   };
@@ -183,13 +122,13 @@ export default function ActivityTracker() {
         completedAt: null,
         priority: 'medium'
       };
-      setTodos([todo, ...todos]);
+      setTodos(prevTodos => [todo, ...prevTodos]);
       setNewTodo('');
     }
   };
 
   const toggleComplete = (id) => {
-    setActivities(activities.map(activity => 
+    setActivities(prevActivities => prevActivities.map(activity => 
       activity.id === id 
         ? { 
             ...activity, 
@@ -206,7 +145,7 @@ export default function ActivityTracker() {
   };
 
   const toggleTodoComplete = (id) => {
-    setTodos(todos.map(todo => 
+    setTodos(prevTodos => prevTodos.map(todo => 
       todo.id === id 
         ? { 
             ...todo, 
@@ -218,7 +157,7 @@ export default function ActivityTracker() {
   };
 
   const deleteActivity = (id) => {
-    setActivities(activities.filter(activity => activity.id !== id));
+    setActivities(prevActivities => prevActivities.filter(activity => activity.id !== id));
     if (activeTimers[id]) {
       const { [id]: removed, ...rest } = activeTimers;
       setActiveTimers(rest);
@@ -226,7 +165,7 @@ export default function ActivityTracker() {
   };
 
   const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
   };
 
   const startTimer = (id) => {
@@ -329,14 +268,14 @@ export default function ActivityTracker() {
         date: selectedDate,
         createdAt: new Date()
       };
-      setJournalEntries([entry, ...journalEntries]);
+      setJournalEntries(prevEntries => [entry, ...prevEntries]);
       setCurrentJournalEntry('');
       setJournalTitle('');
     }
   };
 
   const deleteJournalEntry = (id) => {
-    setJournalEntries(journalEntries.filter(entry => entry.id !== id));
+    setJournalEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
   };
 
   const getJournalForDate = (date) => {
@@ -354,13 +293,13 @@ export default function ActivityTracker() {
         createdAt: new Date(),
         color: ['bg-yellow-100', 'bg-blue-100', 'bg-green-100', 'bg-pink-100', 'bg-purple-100'][Math.floor(Math.random() * 5)]
       };
-      setThoughts([thought, ...thoughts]);
+      setThoughts(prevThoughts => [thought, ...prevThoughts]);
       setCurrentThought('');
     }
   };
 
   const deleteThought = (id) => {
-    setThoughts(thoughts.filter(thought => thought.id !== id));
+    setThoughts(prevThoughts => prevThoughts.filter(thought => thought.id !== id));
   };
 
   // Sketch functions
@@ -419,11 +358,11 @@ export default function ActivityTracker() {
       createdAt: new Date(),
       title: `Sketch ${sketches.length + 1}`
     };
-    setSketches([sketch, ...sketches]);
+    setSketches(prevSketches => [sketch, ...prevSketches]);
   };
 
   const deleteSketch = (id) => {
-    setSketches(sketches.filter(sketch => sketch.id !== id));
+    setSketches(prevSketches => prevSketches.filter(sketch => sketch.id !== id));
   };
 
   const formatTime = (seconds) => {
@@ -469,6 +408,7 @@ export default function ActivityTracker() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Productivity Dashboard</h1>
           <p className="text-gray-600 text-lg">{currentTime.toLocaleDateString()} • {formatDateTime(currentTime)}</p>
+          <p className="text-sm text-orange-600 mt-2">⚠️ Note: Data is stored in memory and will reset when you refresh the page</p>
         </div>
 
         {/* Tab Navigation */}
@@ -509,6 +449,7 @@ export default function ActivityTracker() {
               <p className="text-xl font-semibold">
                 {isToday(selectedDate) ? "Today's" : selectedDate.toLocaleDateString()} Activities: {completedActivities}/{selectedDateActivities.length} completed
               </p>
+              <p className="text-sm opacity-90 mt-1">Total activities: {activities.length}</p>
             </div>
 
             <div className="mb-8">
@@ -629,6 +570,7 @@ export default function ActivityTracker() {
               <p className="text-xl font-semibold">
                 {isToday(selectedDate) ? "Today's" : selectedDate.toLocaleDateString()} To-Do List: {completedTodos}/{selectedDateTodos.length} completed
               </p>
+              <p className="text-sm opacity-90 mt-1">Total to-dos: {todos.length}</p>
             </div>
 
             <div className="mb-8">
@@ -1146,15 +1088,15 @@ export default function ActivityTracker() {
               <>
                 <div className="bg-blue-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-blue-600">{selectedDateActivities.length}</p>
-                  <p className="text-blue-800">Total Activities</p>
+                  <p className="text-blue-800">Today's Activities</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-green-600">{completedActivities}</p>
                   <p className="text-green-800">Completed</p>
                 </div>
                 <div className="bg-orange-50 p-4 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-orange-600">{selectedDateActivities.length - completedActivities}</p>
-                  <p className="text-orange-800">Remaining</p>
+                  <p className="text-2xl font-bold text-orange-600">{activities.length}</p>
+                  <p className="text-orange-800">Total Ever</p>
                 </div>
               </>
             )}
@@ -1162,15 +1104,15 @@ export default function ActivityTracker() {
               <>
                 <div className="bg-purple-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-purple-600">{selectedDateTodos.length}</p>
-                  <p className="text-purple-800">Total To-Dos</p>
+                  <p className="text-purple-800">Today's To-Dos</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-xl text-center">
                   <p className="text-2xl font-bold text-green-600">{completedTodos}</p>
                   <p className="text-green-800">Completed</p>
                 </div>
                 <div className="bg-orange-50 p-4 rounded-xl text-center">
-                  <p className="text-2xl font-bold text-orange-600">{selectedDateTodos.length - completedTodos}</p>
-                  <p className="text-orange-800">Remaining</p>
+                  <p className="text-2xl font-bold text-orange-600">{todos.length}</p>
+                  <p className="text-orange-800">Total Ever</p>
                 </div>
               </>
             )}
